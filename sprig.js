@@ -9,8 +9,8 @@ https://sprig.hackclub.com/gallery/getting_started
 */
 
 const selectedEmpty = "s"
-const darkEmpty = "d"
-const lightEmpty = "l"
+const lightEmpty = "m"
+const darkEmpty = "M"
 
 const pawnWhiteLightSquare = "p"
 const knightWhiteLightSquare = "n"
@@ -731,24 +731,31 @@ const screens = [
   map`
 FcEhGeCf
 aAaAaAaA
-dldldldl
-ldldldld
-dldldldl
-ldldldld
+MmMmMmMm
+mMmMmMmM
+MmMmMmMm
+mMmMmMmM
 PpPpPpPp
 rNbKqBnR`
 ]
 
 setMap(screens[level])
 
-function getSprite(x, y) {
-  const rows = screens[level].split('\n');
-  return rows[y+1][x];
+function getSprite(x, y) {9
+  return getTile(x, y)[0]['_type']
+}
+
+function darkOrLight(x, y) {
+  if ((x+y) % 2 == 0) {
+    return 'dark'
+  } else {
+    return 'light'
+  }
 }
 
 function selectSquare(x, y) {
-  let sprites = ['d', 'l', 'p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e', 'f', 'g', 'h']
-  let correspondingSprites = ['s', 's', '1', '2', '3', '4', '5', '6', '!', '@', '#', '$', '%', '^']
+  let sprites = ['m', 'p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e', 'f', 'g', 'h']
+  let correspondingSprites = ['s', '1', '2', '3', '4', '5', '6', '!', '@', '#', '$', '%', '^']
 
   // Invert X and Y into absolute position
   x = x - 1
@@ -762,6 +769,40 @@ function selectSquare(x, y) {
 
     clearTile(x, y)
     addSprite(x, y, newSprite)
+  }
+}
+
+function unselectSquare(x, y) {
+  const sprites = ['s', '1', '2', '3', '4', '5', '6', '!', '@', '#', '$', '%', '^'];
+  const correspondingSprites = ['m', 'p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e', 'f', 'g', 'h'];
+
+  // Invert X and Y into absolute position
+  x = x - 1;
+  y = 8 - y;
+  
+  let sprite = getSprite(x, y);
+  
+  if (sprites.includes(sprite)) {
+    let indexOfSprite = sprites.indexOf(sprite);
+    let newSprite = correspondingSprites[indexOfSprite];
+
+    if (darkOrLight(x, y) == 'dark') {
+      newSprite = newSprite.toUpperCase()
+    }
+  
+    clearTile(x, y);
+    addSprite(x, y, newSprite);
+  }
+}
+
+function unselectAllSquare() {
+  const sprites = ['s', 's', '1', '2', '3', '4', '5', '6', '!', '@', '#', '$', '%', '^'];
+  const correspondingSprites = ['d', 'l', 'p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e', 'f', 'g', 'h'];
+
+  for (let x = 1; x <= 8; x++) {
+    for (let y = 1; y <= 8; y++) {
+      unselectSquare(x, y)
+    }
   }
 }
 
