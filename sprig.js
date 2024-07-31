@@ -741,8 +741,12 @@ rNbKqBnR`
 
 setMap(screens[level])
 
-function getSprite(x, y) {9
-  return getTile(x, y)[0]['_type']
+function getSprite(x, y) {
+  if (x >= 0 && x <= 7 && y >= 0 && y <= 7) {
+    return getTile(x, y)[0]['_type']
+  } else {
+    return '.'
+  }
 }
 
 function darkOrLight(x, y) {
@@ -832,6 +836,48 @@ function checkPiece(x, y) {
   } else {
     return 'out of board'
   }
+}
+
+function checkPossibleMoves(x, y) {
+  let piece = checkPiece(x, y)
+
+  if (piece == 'empty') {
+    return 'empty'
+  }
+  
+  let pieceColor = piece[0]
+  let pieceName = piece[1]
+  let possibleMoves = []
+
+  if (pieceName == 'Pawn') {
+    // Check Forward Piece
+    let forwardPiece = checkPiece(x, y-1)
+    if (forwardPiece == 'empty') {
+      possibleMoves.push([x, y-1])
+    }
+
+    // Check Two Forward Piece if at Start
+    if (y == 7) {
+      let twoForwardPiece = checkPiece(x, y-2)
+      if (twoForwardPiece == 'empty') {
+        possibleMoves.push([x, y-2])
+      }
+    }
+
+    // Check diagonal captures
+    let rightDiagonalPiece = checkPiece(x-1, y-1)
+    if (rightDiagonalPiece != 'empty' && rightDiagonalPiece != 'out of board' && rightDiagonalPiece[0] != pieceColor) {
+      possibleMoves.push([x-1, y-1])
+    }
+
+    // Check diagonal captures
+    let leftDiagonalPiece = checkPiece(x+1, y-1)
+    if (leftDiagonalPiece != 'empty' && leftDiagonalPiece != 'out of board' && leftDiagonalPiece[0] != pieceColor) {
+      possibleMoves.push([x+1, y-1])
+    }
+  }
+
+  return possibleMoves
 }
 
 let selectedX = 5
