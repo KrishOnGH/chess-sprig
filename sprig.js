@@ -1197,6 +1197,54 @@ function isCheck() {
   }
 }
 
+function isCheckmate() {
+  let checkStatus = isCheck();
+  if (checkStatus === 'No Check') {
+    return 'No Checkmates';
+  }
+
+  let colorInCheck = checkStatus === 'White Is Checked' ? 'White' : 'Black';
+  let opponentColor = colorInCheck === 'White' ? 'Black' : 'White';
+
+  // Check all pieces of the color in check
+  for (let x = 1; x <= 8; x++) {
+    for (let y = 1; y <= 8; y++) {
+      let piece = checkPiece(x, y);
+      if (piece[0] === colorInCheck) {
+        let moves = checkPossibleMoves(x, y);
+        if (moves !== 'empty') {
+          for (let move of moves) {
+            let [toX, toY] = move;
+            let originalTo = getSprite(toX - 1, 8 - toY);
+            let originalFrom = getSprite(x - 1, 8 - y);
+
+            clearTile(x - 1, 8 - y);
+            clearTile(toX - 1, 8 - toY);
+            addSprite(toX - 1, 8 - toY, originalFrom);
+
+            let newCheckStatus = isCheck();
+            if ((colorInCheck === 'White' && newCheckStatus !== 'White Is Checked') ||
+                (colorInCheck === 'Black' && newCheckStatus !== 'Black Is Checked')) {
+              clearTile(x - 1, 8 - y);
+              clearTile(toX - 1, 8 - toY);
+              addSprite(x - 1, 8 - y, originalFrom);
+              addSprite(toX - 1, 8 - toY, originalTo);
+              return 'No Checkmates';
+            }
+
+            clearTile(x - 1, 8 - y);
+            clearTile(toX - 1, 8 - toY);
+            addSprite(x - 1, 8 - y, originalFrom);
+            addSprite(toX - 1, 8 - toY, originalTo);
+          }
+        }
+      }
+    }
+  }
+
+  return colorInCheck === 'White' ? 'White is in Checkmate' : 'Black is in Checkmate';
+}
+
 let selectedX = 5
 let selectedY = 4
 selectSquare(selectedX, selectedY)
@@ -1232,8 +1280,6 @@ onInput("d", () => {
     selectSquare(selectedX, selectedY)
   }
 })
-
-console.log(isCheck())
 
 afterInput(() => {
   
