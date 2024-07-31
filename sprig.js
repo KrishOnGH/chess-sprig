@@ -733,7 +733,7 @@ FcEhGeCf
 aAaAaAaA
 MmMmMmMm
 mMmMmMmM
-MmMmMmMm
+MmMmBmMm
 mMmMmMmM
 PpPpPpPp
 rNbKqBnR`
@@ -875,6 +875,122 @@ function checkPossibleMoves(x, y) {
     if (leftDiagonalPiece != 'empty' && leftDiagonalPiece != 'out of board' && leftDiagonalPiece[0] != pieceColor) {
       possibleMoves.push([x+1, y-1])
     }
+  } else if (pieceName == 'Knight') {
+    // Check Top Middle Right
+    let topMiddleRight = checkPiece(x+1, y+2)
+    if (topMiddleRight != 'out of board' && (topMiddleRight == 'empty' || topMiddleRight[0] != pieceColor)) {
+      possibleMoves.push([x+1, y+2])
+    }
+    
+    // Check Top Middle Left
+    let topMiddleLeft = checkPiece(x-1, y+2)
+    if (topMiddleLeft != 'out of board' && (topMiddleLeft == 'empty' || topMiddleLeft[0] != pieceColor)) {
+      possibleMoves.push([x-1, y+2])
+    }
+    
+    // Check Top Right
+    let topRight = checkPiece(x+2, y+1)
+    if (topRight != 'out of board' && (topRight == 'empty' || topRight[0] != pieceColor)) {
+      possibleMoves.push([x+2, y+1])
+    }
+
+    // Check Top Left
+    let topLeft = checkPiece(x-2, y+1)
+    if (topLeft != 'out of board' && (topLeft == 'empty' || topLeft[0] != pieceColor)) {
+      possibleMoves.push([x-2, y+1])
+    }
+
+    // Check Bottom Middle Right
+    let bottomMiddleRight = checkPiece(x+1, y-2)
+    if (bottomMiddleRight != 'out of board' && (bottomMiddleRight == 'empty' || bottomMiddleRight[0] != pieceColor)) {
+      possibleMoves.push([x+1, y-2])
+    }
+
+    // Check Bottom Middle Left
+    let bottomMiddleLeft = checkPiece(x-1, y-2)
+    if (bottomMiddleLeft != 'out of board' && (bottomMiddleLeft == 'empty' || bottomMiddleLeft[0] != pieceColor)) {
+      possibleMoves.push([x-1, y-2])
+    }
+
+    // Check Bottom Right
+    let bottomRight = checkPiece(x+2, y-1)
+    if (bottomRight != 'out of board' && (bottomRight == 'empty' || bottomRight[0] != pieceColor)) {
+      possibleMoves.push([x+2, y-1])
+    }
+
+    // Check Bottom Left
+    let bottomLeft = checkPiece(x-2, y-1)
+    if (bottomLeft != 'out of board' && (bottomLeft == 'empty' || bottomLeft[0] != pieceColor)) {
+      possibleMoves.push([x-2, y-1])
+    }
+  } else if (pieceName == 'Bishop') {
+    // Top Right Diagonal
+    for (let i = 1; i <= 7; i++) {
+      let squarex = x+i
+      let squarey = y+i
+      let square = checkPiece(squarex, squarey)
+      if (square != 'out of board') {
+        if (square == 'empty') {
+          possibleMoves.push([squarex, squarey])
+        } else if (square[0] != pieceColor) {
+          possibleMoves.push([squarex, squarey])
+          break
+        } else {
+          break
+        }
+      }
+    }
+
+    // Top Left Diagonal
+    for (let i = 1; i <= 7; i++) {
+      let squarex = x-i
+      let squarey = y+i
+      let square = checkPiece(squarex, squarey)
+      if (square != 'out of board') {
+        if (square == 'empty') {
+          possibleMoves.push([squarex, squarey])
+        } else if (square[0] != pieceColor) {
+          possibleMoves.push([squarex, squarey])
+          break
+        } else {
+          break
+        }
+      }
+    }
+
+    // Bottom Right Diagonal
+    for (let i = 1; i <= 7; i++) {
+      let squarex = x+i
+      let squarey = y-i
+      let square = checkPiece(squarex, squarey)
+      if (square != 'out of board') {
+        if (square == 'empty') {
+          possibleMoves.push([squarex, squarey])
+        } else if (square[0] != pieceColor) {
+          possibleMoves.push([squarex, squarey])
+          break
+        } else {
+          break
+        }
+      }
+    }
+
+    // Bottom Left Diagonal
+    for (let i = 1; i <= 7; i++) {
+      let squarex = x-i
+      let squarey = y-i
+      let square = checkPiece(squarex, squarey)
+      if (square != 'out of board') {
+        if (square == 'empty') {
+          possibleMoves.push([squarex, squarey])
+        } else if (square[0] != pieceColor) {
+          possibleMoves.push([squarex, squarey])
+          break
+        } else {
+          break
+        }
+      }
+    }
   }
 
   return possibleMoves
@@ -915,6 +1031,8 @@ onInput("d", () => {
     selectSquare(selectedX, selectedY)
   }
 })
+
+console.log(checkPossibleMoves(5, 4))
 
 afterInput(() => {
   
