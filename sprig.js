@@ -795,7 +795,7 @@ function unselectSquare(x, y) {
   }
 }
 
-function unselectAllSquare() {
+function unselectAllSquares() {
   const sprites = ['s', 's', '1', '2', '3', '4', '5', '6', '!', '@', '#', '$', '%', '^'];
   const correspondingSprites = ['d', 'l', 'p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e', 'f', 'g', 'h'];
 
@@ -805,6 +805,70 @@ function unselectAllSquare() {
     }
   }
 }
+
+function checkPiece(x, y) {
+  const spritesForWhite = ['p', 'n', 'b', 'r', 'q', 'k', '1', '2', '3', '4', '5', '6'];
+  const correspondingNamesForWhite = ['Pawn', 'Knight', 'Bishop', 'Rook', 'Queen', 'King', 'Pawn', 'Knight', 'Bishop', 'Rook', 'Queen', 'King'];
+  
+  const spritesForBlack = ['a', 'c', 'e', 'f', 'g', 'h', '!', '@', '#', '$', '%', '^'];
+  const correspondingNamesForBlack = ['Pawn', 'Knight', 'Bishop', 'Rook', 'Queen', 'King', 'Pawn', 'Knight', 'Bishop', 'Rook', 'Queen', 'King'];
+
+  // Invert X and Y into absolute position
+  x = x - 1
+  y = 8 - y
+  
+  let sprite = getSprite(x, y).toLowerCase()
+
+  if (spritesForWhite.includes(sprite)) {
+    let indexOfSprite = spritesForWhite.indexOf(sprite);
+    let name = correspondingNamesForWhite[indexOfSprite];
+    return ["White", name]
+  } else if (spritesForBlack.includes(sprite)) {
+    let indexOfSprite = spritesForBlack.indexOf(sprite);
+    let name = correspondingNamesForBlack[indexOfSprite];
+    return ["Black", name]
+  } else if (sprite == 'm') {
+    return 'empty'
+  } else {
+    return 'out of board'
+  }
+}
+
+let selectedX = 5
+let selectedY = 4
+selectSquare(selectedX, selectedY)
+
+onInput("w", () => {
+  if (selectedY < 8) {
+    selectedY++
+    unselectAllSquares()
+    selectSquare(selectedX, selectedY)
+  }
+})
+
+onInput("a", () => {
+  if (selectedX > 1) {
+    selectedX--
+    unselectAllSquares()
+    selectSquare(selectedX, selectedY)
+  }
+})
+
+onInput("s", () => {
+  if (selectedY > 1) {
+    selectedY--
+    unselectAllSquares()
+    selectSquare(selectedX, selectedY)
+  }
+})
+
+onInput("d", () => {
+  if (selectedX < 8) {
+    selectedX++
+    unselectAllSquares()
+    selectSquare(selectedX, selectedY)
+  }
+})
 
 afterInput(() => {
   
