@@ -831,7 +831,7 @@ function checkPiece(x, y) {
     let indexOfSprite = spritesForBlack.indexOf(sprite);
     let name = correspondingNamesForBlack[indexOfSprite];
     return ["Black", name]
-  } else if (sprite == 'm') {
+  } else if (sprite == 'm' || sprite == 's') {
     return 'empty'
   } else {
     return 'out of board'
@@ -850,30 +850,58 @@ function checkPossibleMoves(x, y) {
   let possibleMoves = []
 
   if (pieceName == 'Pawn') {
-    // Check Forward Piece
-    let forwardPiece = checkPiece(x, y-1)
-    if (forwardPiece == 'empty') {
-      possibleMoves.push([x, y-1])
-    }
-
-    // Check Two Forward Piece if at Start
-    if (y == 7) {
-      let twoForwardPiece = checkPiece(x, y-2)
-      if (twoForwardPiece == 'empty') {
-        possibleMoves.push([x, y-2])
+    if (pieceColor == 'White') {
+      // Check Forward Piece
+      let forwardPiece = checkPiece(x, y+1)
+      if (forwardPiece == 'empty') {
+        possibleMoves.push([x, y+1])
       }
-    }
-
-    // Check diagonal captures
-    let rightDiagonalPiece = checkPiece(x-1, y-1)
-    if (rightDiagonalPiece != 'empty' && rightDiagonalPiece != 'out of board' && rightDiagonalPiece[0] != pieceColor) {
-      possibleMoves.push([x-1, y-1])
-    }
-
-    // Check diagonal captures
-    let leftDiagonalPiece = checkPiece(x+1, y-1)
-    if (leftDiagonalPiece != 'empty' && leftDiagonalPiece != 'out of board' && leftDiagonalPiece[0] != pieceColor) {
-      possibleMoves.push([x+1, y-1])
+  
+      // Check Two Forward Piece if at Start
+      if (y == 2) {
+        let twoForwardPiece = checkPiece(x, y+2)
+        if (twoForwardPiece == 'empty') {
+          possibleMoves.push([x, y+2])
+        }
+      }
+  
+      // Check diagonal captures
+      let rightDiagonalPiece = checkPiece(x-1, y+1)
+      if (rightDiagonalPiece != 'empty' && rightDiagonalPiece != 'out of board' && rightDiagonalPiece[0] != pieceColor) {
+        possibleMoves.push([x-1, y+1])
+      }
+  
+      // Check diagonal captures
+      let leftDiagonalPiece = checkPiece(x+1, y+1)
+      if (leftDiagonalPiece != 'empty' && leftDiagonalPiece != 'out of board' && leftDiagonalPiece[0] != pieceColor) {
+        possibleMoves.push([x+1, y+1])
+      }
+    } else if (pieceColor == 'Black') {
+      // Check Forward Piece
+      let forwardPiece = checkPiece(x, y-1)
+      if (forwardPiece == 'empty') {
+        possibleMoves.push([x, y-1])
+      }
+  
+      // Check Two Forward Piece if at Start
+      if (y == 7) {
+        let twoForwardPiece = checkPiece(x, y-2)
+        if (twoForwardPiece == 'empty') {
+          possibleMoves.push([x, y-2])
+        }
+      }
+  
+      // Check diagonal captures
+      let rightDiagonalPiece = checkPiece(x-1, y-1)
+      if (rightDiagonalPiece != 'empty' && rightDiagonalPiece != 'out of board' && rightDiagonalPiece[0] != pieceColor) {
+        possibleMoves.push([x-1, y-1])
+      }
+  
+      // Check diagonal captures
+      let leftDiagonalPiece = checkPiece(x+1, y-1)
+      if (leftDiagonalPiece != 'empty' && leftDiagonalPiece != 'out of board' && leftDiagonalPiece[0] != pieceColor) {
+        possibleMoves.push([x+1, y-1])
+      }
     }
   } 
   
@@ -1120,6 +1148,55 @@ function checkPossibleMoves(x, y) {
   return possibleMoves
 }
 
+function isCheck() {
+  let whiteKingX
+  let whiteKingY
+  let blackKingX
+  let blackKingY
+  let whiteControls = new Set()
+  let blackControls = new Set()
+
+  for (let x = 0; x <= 7; x++) {
+    for (let y = 0; y <= 7; y++) {
+      let sprite = getSprite(x, y).toLowerCase();
+      
+      if (sprite == 'k' || sprite == '6') {
+        whiteKingX = x;
+        whiteKingY = y;
+      } else if (sprite == 'h' || sprite == '^') {
+        blackKingX = x;
+        blackKingY = y;
+      } 
+      
+      let piece = checkPiece(x + 1, 8 - y);
+      if (piece[0] == 'White') {
+        checkPossibleMoves(x + 1, 8 - y).forEach(move => {
+          whiteControls.add(JSON.stringify(move));
+        });
+      } else if (piece[0] == 'Black') {
+        checkPossibleMoves(x + 1, 8 - y).forEach(move => {
+          blackControls.add(JSON.stringify(move));
+        });
+      }
+    }
+  }
+
+  whiteControls = Array.from(whiteControls).map(JSON.parse)
+  blackControls = Array.from(blackControls).map(JSON.parse)
+
+  function containsCoordinate(array, coordinate) {
+    return array.some(item => item[0] === coordinate[0] && item[1] === coordinate[1]);
+  }
+  
+  if (containsCoordinate(blackControls, [4, 1])) {
+    return 'White Is Checked';
+  } else if (containsCoordinate(whiteControls, [blackKingX, blackKingY])) {
+    return 'Black Is Checked';
+  } else {
+    return 'No Check';
+  }
+}
+
 let selectedX = 5
 let selectedY = 4
 selectSquare(selectedX, selectedY)
@@ -1155,6 +1232,8 @@ onInput("d", () => {
     selectSquare(selectedX, selectedY)
   }
 })
+
+console.log(isCheck())
 
 afterInput(() => {
   
