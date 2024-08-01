@@ -1204,9 +1204,45 @@ function isCheckmate() {
   }
 
   let colorInCheck = checkStatus === 'White Is Checked' ? 'White' : 'Black';
-  let opponentColor = colorInCheck === 'White' ? 'Black' : 'White';
 
-  // Check all pieces of the color in check
+  function simulateMove(board, color) {
+    let kingX, kingY;
+    let opponentColor = color === 'White' ? 'Black' : 'White';
+  
+    // Find the king's position
+    for (let x = 0; x < 8; x++) {
+      for (let y = 0; y < 8; y++) {
+        if (board[x][y].toLowerCase() === (color === 'White' ? 'k' : 'h')) {
+          kingX = x;
+          kingY = y;
+          break;
+        }
+      }
+      if (kingX !== undefined) break;
+    }
+  
+    // Check if any opponent piece can attack the king
+    for (let x = 1; x <= 8; x++) {
+      for (let y = 1; y <= 8; y++) {
+        let piece = checkPiece(x, y);
+        if (piece[0] === opponentColor) {
+          let moves = checkPossibleMoves(x, y);
+          if (moves !== 'empty') {
+            for (let move of moves) {
+              let [toX, toY] = move;
+              if (toX - 1 === kingX && 8 - toY === kingY) {
+                return true; // King is in check
+              }
+            }
+          }
+        }
+      }
+    }
+  
+    return false; // King is not in check
+  }
+  
+  // Simulate all possible moves to see if they stop checkmate
   for (let x = 1; x <= 8; x++) {
     for (let y = 1; y <= 8; y++) {
       let piece = checkPiece(x, y);
@@ -1215,27 +1251,27 @@ function isCheckmate() {
         if (moves !== 'empty') {
           for (let move of moves) {
             let [toX, toY] = move;
-            let originalTo = getSprite(toX - 1, 8 - toY);
-            let originalFrom = getSprite(x - 1, 8 - y);
-
-            clearTile(x - 1, 8 - y);
-            clearTile(toX - 1, 8 - toY);
-            addSprite(toX - 1, 8 - toY, originalFrom);
-
-            let newCheckStatus = isCheck();
-            if ((colorInCheck === 'White' && newCheckStatus !== 'White Is Checked') ||
-                (colorInCheck === 'Black' && newCheckStatus !== 'Black Is Checked')) {
-              clearTile(x - 1, 8 - y);
-              clearTile(toX - 1, 8 - toY);
-              addSprite(x - 1, 8 - y, originalFrom);
-              addSprite(toX - 1, 8 - toY, originalTo);
-              return 'No Checkmates';
+            console.log(toX)
+            console.log(toY)
+            
+            // Simulate the move
+            let simulatedBoard = [];
+            for (let simX = 0; simX <= 7; simX++) {
+              simulatedBoard[simX] = [];
+              for (let simY = 0; simY <= 7; simY++) {
+                simulatedBoard[simX][simY] = getSprite(simX, simY);
+              }
             }
-
-            clearTile(x - 1, 8 - y);
-            clearTile(toX - 1, 8 - toY);
-            addSprite(x - 1, 8 - y, originalFrom);
-            addSprite(toX - 1, 8 - toY, originalTo);
+            console.log(simulatedBoard)
+            
+            // Update simulated board
+            simulatedBoard[toX - 1][8 - toY] = simulatedBoard[x - 1][8 - y];
+            simulatedBoard[x - 1][8 - y] = darkOrLight(x - 1, 8 - y) === 'dark' ? 'M' : 'm';
+            
+            // Check if the simulated move prevents check
+            if (!simulateMove(simulatedBoard, colorInCheck)) {
+              return "Not checkmate";
+            }
           }
         }
       }
@@ -1248,6 +1284,8 @@ function isCheckmate() {
 let selectedX = 5
 let selectedY = 4
 selectSquare(selectedX, selectedY)
+
+console.log(isCheckmate())
 
 onInput("w", () => {
   if (selectedY < 8) {
