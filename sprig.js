@@ -728,7 +728,8 @@ setLegend(
 
 let level = 0
 const screens = [
-  map`FcEhGeCf
+  map`
+FcEhGeCf
 aAaAaAaA
 MmMmMmMm
 mMmMmMmM
@@ -739,7 +740,8 @@ rNbKqBnR`
 ]
 
 const board = [[], [], [], [], [], [], [], []]
-const rows = screens[0].split('\n');
+const content = screens[0].startsWith('\n') ? screens[0].substring(1) : screens[0];
+const rows = content.split('\n')
 for (let y = 0; y <= 7; y++) {
   for (let x = 0; x <= 7; x++) {
     board[y].push(rows[y][x])
@@ -834,7 +836,7 @@ function checkPiece(board, x, y) {
   // Invert X and Y into absolute position
   x = x - 1
   y = 8 - y
-  
+
   let sprite = getSprite(board, x, y).toLowerCase()
 
   if (spritesForWhite.includes(sprite)) {
@@ -1270,6 +1272,94 @@ function isCheckmate(board) {
   }
 
   return colorInCheck === 'White' ? 'White is in Checkmate' : 'Black is in Checkmate';
+}
+
+function isStalemate(board) {
+  let checkStatus = isCheck(board);
+  if (checkStatus !== 'No Check') {
+    return false;
+  }
+
+  let whiteHasNoMoves = true
+  let blackHasNoMoves = true
+
+  // Check all squares to see if the player has any legal moves
+  for (let x = 1; x <= 8; x++) {
+    for (let y = 1; y <= 8; y++) {
+      let piece = checkPiece(board, x, y)
+      if (piece[0] === 'White') {
+        let moves = checkPossibleMoves(board, x, y)
+        if (moves !== 'empty') {
+          for (let move of moves) {
+            let [toX, toY] = move;
+            
+            simulatedBoard = simulateBoard(board, x, y, toX, toY)
+            
+            // Check if the simulated move prevents check
+            if (isCheck(simulatedBoard) != 'White Is Checked') {
+              whiteHasNoMoves = false
+            }
+          }
+        }
+      } else if (piece[0] === 'Black') {
+        let moves = checkPossibleMoves(board, x, y)
+        if (moves !== 'empty') {
+          for (let move of moves) {
+            let [toX, toY] = move;
+            
+            simulatedBoard = simulateBoard(board, x, y, toX, toY)
+            
+            // Check if the simulated move prevents check
+            if (isCheck(simulatedBoard) != 'Black Is Checked') {
+              blackHasNoMoves = false
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (whiteHasNoMoves || blackHasNoMoves) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function isDrawByInsufficientMaterial(board) {
+  let whiteHasInsufficientMaterial = true
+  let blackHasInsufficientMaterial = true
+  let whitePieces = []
+  let blackPieces = []
+
+  for (let x = 1; x <= 8; x++) {
+    for (let y = 1; y <= 8; y++) {
+      let piece = checkPiece(board, x, y)
+
+      if (piece[0] == 'White') {
+        whitePieces.push(piece[1])
+      } else if (piece[0] == 'Black') {
+        blackPieces.push(piece[1])
+      }
+    }
+  }
+
+  if (whitePieces.includes('Pawn') || whitePieces.includes('Rook') || whitePieces.includes('Queen')) {
+    whiteHasInsufficientMaterial = false
+  } else if ((whitePieces.filter(x => x === 'Bishop').length >= 2) || (whitePieces.includes('Bishop') && whitePieces.includes('Knight'))) {
+    whiteHasInsufficientMaterial = false
+  }
+
+  if (blackPieces.includes('Pawn') || blackPieces.includes('Rook') || blackPieces.includes('Queen')) {
+    blackHasInsufficientMaterial = false
+  } else if ((blackPieces.filter(x => x === 'Bishop').length >= 2) || (blackPieces.includes('Bishop') && blackPieces.includes('Knight'))) {
+    blackHasInsufficientMaterial = false
+  }
+
+  if (whiteHasInsufficientMaterial && blackHasInsufficientMaterial) {
+    return true
+  }
+  return false
 }
 
 let selectedX = 5
