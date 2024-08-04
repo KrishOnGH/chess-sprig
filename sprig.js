@@ -1412,44 +1412,89 @@ function move(board, x, y, toX, toY) {
   } else {
     setSprite(board, x, y, 'm')
   }
+
+  return 'Successful'
 }
 
 let selectedX = 5
 let selectedY = 4
+let placingX = 5
+let placingY = 4
+let isPlacing = false
 selectSquare(board, selectedX, selectedY)
 
 onInput("w", () => {
-  if (selectedY < 8) {
-    selectedY++
+  if (isPlacing && placingY < 8) {
     unselectAllSquares(board)
-    selectSquare(board, selectedX, selectedY)
+    placingY++
+    selectSquare(board, placingX, placingY)
+  } else if (!isPlacing && selectedY < 8) {
+    unselectAllSquares(board)
+    selectedY++
   }
+  
+  selectSquare(board, selectedX, selectedY)
 })
 
 onInput("a", () => {
-  if (selectedX > 1) {
-    selectedX--
+  if (isPlacing && placingX > 1) {
     unselectAllSquares(board)
-    selectSquare(board, selectedX, selectedY)
+    placingX--
+    selectSquare(board, placingX, placingY)
+  } else if (!isPlacing && selectedX > 1) {
+    unselectAllSquares(board)
+    selectedX--
   }
+  
+  selectSquare(board, selectedX, selectedY)
 })
 
 onInput("s", () => {
-  if (selectedY > 1) {
+  if (isPlacing && placingY > 1) {
+    unselectAllSquares(board)
+    placingY--
+    selectSquare(board, placingX, placingY)
+  } else if (!isPlacing && selectedY > 1) {
+    unselectAllSquares(board)
     selectedY--
-    unselectAllSquares(board)
-    selectSquare(board, selectedX, selectedY)
   }
-})
-
-onInput("d", () => {
-  if (selectedX < 8) {
-    selectedX++
-    unselectAllSquares(board)
-    selectSquare(board, selectedX, selectedY)
-  }
-})
-
-afterInput(() => {
   
+  selectSquare(board, selectedX, selectedY)
 })
+
+onInput("d", () => { 
+  if (isPlacing && placingX < 8) {
+    unselectAllSquares(board)
+    placingX++
+    selectSquare(board, placingX, placingY)
+  } else if (!isPlacing && selectedX < 8) {
+    unselectAllSquares(board)
+    selectedX++
+  }
+  
+  selectSquare(board, selectedX, selectedY)
+})
+
+onInput("i", () => {
+  isPlacing = !isPlacing
+  if (isPlacing) {
+    selectSquare(board, placingX, placingY)
+  } else {
+    unselectSquare(board, placingX, placingY)
+  }
+})
+
+onInput("l", () => {
+  if (isPlacing && (checkPiece(board, selectedX, selectedY)[0] == 'White' || checkPiece(board, selectedX, selectedY)[0] == 'Black') && checkPiece(board, selectedX, selectedY)[0] != checkPiece(board, placingX, placingY)[0]) {
+    let moveStatus = move(board, selectedX, selectedY, placingX, placingY)
+    if (moveStatus == 'Successful') {
+      unselectAllSquares(board)
+      selectedX = 5
+      selectedY = 4
+      selectSquare(board, selectedX, selectedY)
+      isPlacing = false
+    }
+  }
+})
+
+afterInput(() => {})
