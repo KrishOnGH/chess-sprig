@@ -739,14 +739,29 @@ PpPpPpPp
 rNbKqBnR`
 ]
 
+const rows = screens[0].split('\n').map(row => row.split(''));
+const board = Array.from({ length: 8 }, () => []);
+rows.forEach(row => {
+  row.forEach((char, index) => {
+    board[index].push(char);
+  });
+});
+
 setMap(screens[level])
 
-function getSprite(x, y) {
+// Screen control functions
+function getSprite(board, x, y) {
   if (x >= 0 && x <= 7 && y >= 0 && y <= 7) {
-    return getTile(x, y)[0]['_type']
+    return board[x][y]
   } else {
     return '.'
   }
+}
+
+function setSprite(board, x, y, newSprite) {
+    clearTile(x, y)
+    addSprite(x, y, newSprite)
+    board[x][y] = newSprite
 }
 
 function darkOrLight(x, y) {
@@ -757,7 +772,8 @@ function darkOrLight(x, y) {
   }
 }
 
-function selectSquare(x, y) {
+// Selection functions
+function selectSquare(board, x, y) {
   let sprites = ['m', 'p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e', 'f', 'g', 'h']
   let correspondingSprites = ['s', '1', '2', '3', '4', '5', '6', '!', '@', '#', '$', '%', '^']
 
@@ -765,18 +781,17 @@ function selectSquare(x, y) {
   x = x - 1
   y = 8 - y
 
-  let sprite = getSprite(x, y).toLowerCase()
+  let sprite = getSprite(board, x, y).toLowerCase()
   
   if (sprites.includes(sprite)) {
     let indexOfSprite = sprites.indexOf(sprite)
     let newSprite = correspondingSprites[indexOfSprite]
 
-    clearTile(x, y)
-    addSprite(x, y, newSprite)
+    setSprite(board, x, y, newSprite)
   }
 }
 
-function unselectSquare(x, y) {
+function unselectSquare(board, x, y) {
   const sprites = ['s', '1', '2', '3', '4', '5', '6', '!', '@', '#', '$', '%', '^'];
   const correspondingSprites = ['m', 'p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e', 'f', 'g', 'h'];
 
@@ -784,7 +799,7 @@ function unselectSquare(x, y) {
   x = x - 1;
   y = 8 - y;
   
-  let sprite = getSprite(x, y);
+  let sprite = getSprite(board, x, y);
   
   if (sprites.includes(sprite)) {
     let indexOfSprite = sprites.indexOf(sprite);
@@ -794,23 +809,23 @@ function unselectSquare(x, y) {
       newSprite = newSprite.toUpperCase()
     }
   
-    clearTile(x, y);
-    addSprite(x, y, newSprite);
+    setSprite(board, x, y, newSprite)
   }
 }
 
-function unselectAllSquares() {
+function unselectAllSquares(board) {
   const sprites = ['s', 's', '1', '2', '3', '4', '5', '6', '!', '@', '#', '$', '%', '^'];
   const correspondingSprites = ['d', 'l', 'p', 'n', 'b', 'r', 'q', 'k', 'a', 'c', 'e', 'f', 'g', 'h'];
 
   for (let x = 1; x <= 8; x++) {
     for (let y = 1; y <= 8; y++) {
-      unselectSquare(x, y)
+      unselectSquare(board, x, y)
     }
   }
 }
 
-function checkPiece(x, y) {
+// Information retrieval functions
+function checkPiece(board, x, y) {
   const spritesForWhite = ['p', 'n', 'b', 'r', 'q', 'k', '1', '2', '3', '4', '5', '6'];
   const correspondingNamesForWhite = ['Pawn', 'Knight', 'Bishop', 'Rook', 'Queen', 'King', 'Pawn', 'Knight', 'Bishop', 'Rook', 'Queen', 'King'];
   
@@ -821,7 +836,7 @@ function checkPiece(x, y) {
   x = x - 1
   y = 8 - y
   
-  let sprite = getSprite(x, y).toLowerCase()
+  let sprite = getSprite(board, x, y).toLowerCase()
 
   if (spritesForWhite.includes(sprite)) {
     let indexOfSprite = spritesForWhite.indexOf(sprite);
@@ -838,8 +853,8 @@ function checkPiece(x, y) {
   }
 }
 
-function checkPossibleMoves(x, y) {
-  let piece = checkPiece(x, y)
+function checkPossibleMoves(board, x, y) {
+  let piece = checkPiece(board, x, y)
 
   if (piece == 'empty') {
     return 'empty'
@@ -852,53 +867,53 @@ function checkPossibleMoves(x, y) {
   if (pieceName == 'Pawn') {
     if (pieceColor == 'White') {
       // Check Forward Piece
-      let forwardPiece = checkPiece(x, y+1)
+      let forwardPiece = checkPiece(board, x, y+1)
       if (forwardPiece == 'empty') {
         possibleMoves.push([x, y+1])
       }
   
       // Check Two Forward Piece if at Start
       if (y == 2) {
-        let twoForwardPiece = checkPiece(x, y+2)
+        let twoForwardPiece = checkPiece(board, x, y+2)
         if (twoForwardPiece == 'empty') {
           possibleMoves.push([x, y+2])
         }
       }
   
       // Check diagonal captures
-      let rightDiagonalPiece = checkPiece(x-1, y+1)
+      let rightDiagonalPiece = checkPiece(board, x-1, y+1)
       if (rightDiagonalPiece != 'empty' && rightDiagonalPiece != 'out of board' && rightDiagonalPiece[0] != pieceColor) {
         possibleMoves.push([x-1, y+1])
       }
   
       // Check diagonal captures
-      let leftDiagonalPiece = checkPiece(x+1, y+1)
+      let leftDiagonalPiece = checkPiece(board, x+1, y+1)
       if (leftDiagonalPiece != 'empty' && leftDiagonalPiece != 'out of board' && leftDiagonalPiece[0] != pieceColor) {
         possibleMoves.push([x+1, y+1])
       }
     } else if (pieceColor == 'Black') {
       // Check Forward Piece
-      let forwardPiece = checkPiece(x, y-1)
+      let forwardPiece = checkPiece(board, x, y-1)
       if (forwardPiece == 'empty') {
         possibleMoves.push([x, y-1])
       }
   
       // Check Two Forward Piece if at Start
       if (y == 7) {
-        let twoForwardPiece = checkPiece(x, y-2)
+        let twoForwardPiece = checkPiece(board, x, y-2)
         if (twoForwardPiece == 'empty') {
           possibleMoves.push([x, y-2])
         }
       }
   
       // Check diagonal captures
-      let rightDiagonalPiece = checkPiece(x-1, y-1)
+      let rightDiagonalPiece = checkPiece(board, x-1, y-1)
       if (rightDiagonalPiece != 'empty' && rightDiagonalPiece != 'out of board' && rightDiagonalPiece[0] != pieceColor) {
         possibleMoves.push([x-1, y-1])
       }
   
       // Check diagonal captures
-      let leftDiagonalPiece = checkPiece(x+1, y-1)
+      let leftDiagonalPiece = checkPiece(board, x+1, y-1)
       if (leftDiagonalPiece != 'empty' && leftDiagonalPiece != 'out of board' && leftDiagonalPiece[0] != pieceColor) {
         possibleMoves.push([x+1, y-1])
       }
@@ -907,49 +922,49 @@ function checkPossibleMoves(x, y) {
   
   if (pieceName == 'Knight') {
     // Check Top Middle Right
-    let topMiddleRight = checkPiece(x+1, y+2)
+    let topMiddleRight = checkPiece(board, x+1, y+2)
     if (topMiddleRight != 'out of board' && (topMiddleRight == 'empty' || topMiddleRight[0] != pieceColor)) {
       possibleMoves.push([x+1, y+2])
     }
     
     // Check Top Middle Left
-    let topMiddleLeft = checkPiece(x-1, y+2)
+    let topMiddleLeft = checkPiece(board, x-1, y+2)
     if (topMiddleLeft != 'out of board' && (topMiddleLeft == 'empty' || topMiddleLeft[0] != pieceColor)) {
       possibleMoves.push([x-1, y+2])
     }
     
     // Check Top Right
-    let topRight = checkPiece(x+2, y+1)
+    let topRight = checkPiece(board, x+2, y+1)
     if (topRight != 'out of board' && (topRight == 'empty' || topRight[0] != pieceColor)) {
       possibleMoves.push([x+2, y+1])
     }
 
     // Check Top Left
-    let topLeft = checkPiece(x-2, y+1)
+    let topLeft = checkPiece(board, x-2, y+1)
     if (topLeft != 'out of board' && (topLeft == 'empty' || topLeft[0] != pieceColor)) {
       possibleMoves.push([x-2, y+1])
     }
 
     // Check Bottom Middle Right
-    let bottomMiddleRight = checkPiece(x+1, y-2)
+    let bottomMiddleRight = checkPiece(board, x+1, y-2)
     if (bottomMiddleRight != 'out of board' && (bottomMiddleRight == 'empty' || bottomMiddleRight[0] != pieceColor)) {
       possibleMoves.push([x+1, y-2])
     }
 
     // Check Bottom Middle Left
-    let bottomMiddleLeft = checkPiece(x-1, y-2)
+    let bottomMiddleLeft = checkPiece(board, x-1, y-2)
     if (bottomMiddleLeft != 'out of board' && (bottomMiddleLeft == 'empty' || bottomMiddleLeft[0] != pieceColor)) {
       possibleMoves.push([x-1, y-2])
     }
 
     // Check Bottom Right
-    let bottomRight = checkPiece(x+2, y-1)
+    let bottomRight = checkPiece(board, x+2, y-1)
     if (bottomRight != 'out of board' && (bottomRight == 'empty' || bottomRight[0] != pieceColor)) {
       possibleMoves.push([x+2, y-1])
     }
 
     // Check Bottom Left
-    let bottomLeft = checkPiece(x-2, y-1)
+    let bottomLeft = checkPiece(board, x-2, y-1)
     if (bottomLeft != 'out of board' && (bottomLeft == 'empty' || bottomLeft[0] != pieceColor)) {
       possibleMoves.push([x-2, y-1])
     }
@@ -960,7 +975,7 @@ function checkPossibleMoves(x, y) {
     for (let i = 1; i <= 7; i++) {
       let squarex = x+i
       let squarey = y+i
-      let square = checkPiece(squarex, squarey)
+      let square = checkPiece(board, squarex, squarey)
       if (square != 'out of board') {
         if (square == 'empty') {
           possibleMoves.push([squarex, squarey])
@@ -977,7 +992,7 @@ function checkPossibleMoves(x, y) {
     for (let i = 1; i <= 7; i++) {
       let squarex = x-i
       let squarey = y+i
-      let square = checkPiece(squarex, squarey)
+      let square = checkPiece(board, squarex, squarey)
       if (square != 'out of board') {
         if (square == 'empty') {
           possibleMoves.push([squarex, squarey])
@@ -994,7 +1009,7 @@ function checkPossibleMoves(x, y) {
     for (let i = 1; i <= 7; i++) {
       let squarex = x+i
       let squarey = y-i
-      let square = checkPiece(squarex, squarey)
+      let square = checkPiece(board, squarex, squarey)
       if (square != 'out of board') {
         if (square == 'empty') {
           possibleMoves.push([squarex, squarey])
@@ -1011,7 +1026,7 @@ function checkPossibleMoves(x, y) {
     for (let i = 1; i <= 7; i++) {
       let squarex = x-i
       let squarey = y-i
-      let square = checkPiece(squarex, squarey)
+      let square = checkPiece(board, squarex, squarey)
       if (square != 'out of board') {
         if (square == 'empty') {
           possibleMoves.push([squarex, squarey])
@@ -1030,7 +1045,7 @@ function checkPossibleMoves(x, y) {
     for (let i = 1; i <= 7; i++) {
       let squarex = x
       let squarey = y+i
-      let square = checkPiece(squarex, squarey)
+      let square = checkPiece(board, squarex, squarey)
       if (square != 'out of board') {
         if (square == 'empty') {
           possibleMoves.push([squarex, squarey])
@@ -1047,7 +1062,7 @@ function checkPossibleMoves(x, y) {
     for (let i = 1; i <= 7; i++) {
       let squarex = x
       let squarey = y-i
-      let square = checkPiece(squarex, squarey)
+      let square = checkPiece(board, squarex, squarey)
       if (square != 'out of board') {
         if (square == 'empty') {
           possibleMoves.push([squarex, squarey])
@@ -1064,7 +1079,7 @@ function checkPossibleMoves(x, y) {
     for (let i = 1; i <= 7; i++) {
       let squarex = x-i
       let squarey = y
-      let square = checkPiece(squarex, squarey)
+      let square = checkPiece(board, squarex, squarey)
       if (square != 'out of board') {
         if (square == 'empty') {
           possibleMoves.push([squarex, squarey])
@@ -1081,7 +1096,7 @@ function checkPossibleMoves(x, y) {
     for (let i = 1; i <= 7; i++) {
       let squarex = x+i
       let squarey = y
-      let square = checkPiece(squarex, squarey)
+      let square = checkPiece(board, squarex, squarey)
       if (square != 'out of board') {
         if (square == 'empty') {
           possibleMoves.push([squarex, squarey])
@@ -1097,49 +1112,49 @@ function checkPossibleMoves(x, y) {
 
   if (pieceName == 'King') {
     // Up
-    let up = checkPiece(x, y+1)
+    let up = checkPiece(board, x, y+1)
     if (up != 'out of board' && (up == 'empty' || up[0] != pieceColor)) {
       possibleMoves.push([x, y+1])
     }
 
     // Down
-    let down = checkPiece(x, y-1)
+    let down = checkPiece(board, x, y-1)
     if (down != 'out of board' && (down == 'empty' || down[0] != pieceColor)) {
       possibleMoves.push([x, y-1])
     }
 
     // Left
-    let left = checkPiece(x-1, y)
+    let left = checkPiece(board, x-1, y)
     if (left != 'out of board' && (left == 'empty' || left[0] != pieceColor)) {
       possibleMoves.push([x-1, y])
     }
 
     // Right
-    let right = checkPiece(x+1, y)
+    let right = checkPiece(board, x+1, y)
     if (right != 'out of board' && (right == 'empty' || right[0] != pieceColor)) {
       possibleMoves.push([x+1, y])
     }
 
     // Top Right
-    let topRight = checkPiece(x+1, y+1)
+    let topRight = checkPiece(board, x+1, y+1)
     if (topRight != 'out of board' && (topRight == 'empty' || topRight[0] != pieceColor)) {
       possibleMoves.push([x+1, y+1])
     }
 
     // Top Left
-    let topLeft = checkPiece(x-1, y+1)
+    let topLeft = checkPiece(board, x-1, y+1)
     if (topLeft != 'out of board' && (topLeft == 'empty' || topLeft[0] != pieceColor)) {
       possibleMoves.push([x-1, y+1])
     }
 
     // Bottom Right
-    let bottomRight = checkPiece(x+1, y-1)
+    let bottomRight = checkPiece(board, x+1, y-1)
     if (bottomRight != 'out of board' && (bottomRight == 'empty' || bottomRight[0] != pieceColor)) {
       possibleMoves.push([x+1, y-1])
     }
 
     // Bottom Left
-    let bottomLeft = checkPiece(x-1, y-1)
+    let bottomLeft = checkPiece(board, x-1, y-1)
     if (bottomLeft != 'out of board' && (bottomLeft == 'empty' || bottomLeft[0] != pieceColor)) {
       possibleMoves.push([x-1, y-1])
     }
@@ -1148,7 +1163,8 @@ function checkPossibleMoves(x, y) {
   return possibleMoves
 }
 
-function isCheck() {
+// Game state validator functions
+function isCheck(board) {
   let whiteKingX
   let whiteKingY
   let blackKingX
@@ -1158,7 +1174,7 @@ function isCheck() {
 
   for (let x = 0; x <= 7; x++) {
     for (let y = 0; y <= 7; y++) {
-      let sprite = getSprite(x, y).toLowerCase();
+      let sprite = getSprite(board, x, y).toLowerCase();
       
       if (sprite == 'k' || sprite == '6') {
         whiteKingX = x;
@@ -1168,13 +1184,13 @@ function isCheck() {
         blackKingY = y;
       } 
       
-      let piece = checkPiece(x + 1, 8 - y);
+      let piece = checkPiece(board, x + 1, 8 - y);
       if (piece[0] == 'White') {
-        checkPossibleMoves(x + 1, 8 - y).forEach(move => {
+        checkPossibleMoves(board, x + 1, 8 - y).forEach(move => {
           whiteControls.add(JSON.stringify(move));
         });
       } else if (piece[0] == 'Black') {
-        checkPossibleMoves(x + 1, 8 - y).forEach(move => {
+        checkPossibleMoves(board, x + 1, 8 - y).forEach(move => {
           blackControls.add(JSON.stringify(move));
         });
       }
@@ -1187,8 +1203,13 @@ function isCheck() {
   function containsCoordinate(array, coordinate) {
     return array.some(item => item[0] === coordinate[0] && item[1] === coordinate[1]);
   }
+
+  whiteKingX = whiteKingX + 1
+  whiteKingY = 8 - whiteKingY
+  blackKingX = blackKingX + 1
+  blackKingY = 8 - blackKingY
   
-  if (containsCoordinate(blackControls, [4, 1])) {
+  if (containsCoordinate(blackControls, [whiteKingX, whiteKingY])) {
     return 'White Is Checked';
   } else if (containsCoordinate(whiteControls, [blackKingX, blackKingY])) {
     return 'Black Is Checked';
@@ -1197,125 +1218,39 @@ function isCheck() {
   }
 }
 
-function isCheckmate() {
-  let checkStatus = isCheck();
-  if (checkStatus === 'No Check') {
-    return 'No Checkmates';
-  }
-
-  let colorInCheck = checkStatus === 'White Is Checked' ? 'White' : 'Black';
-
-  function simulateMove(board, color) {
-    let kingX, kingY;
-    let opponentColor = color === 'White' ? 'Black' : 'White';
-  
-    // Find the king's position
-    for (let x = 0; x < 8; x++) {
-      for (let y = 0; y < 8; y++) {
-        if (board[x][y].toLowerCase() === (color === 'White' ? 'k' : 'h')) {
-          kingX = x;
-          kingY = y;
-          break;
-        }
-      }
-      if (kingX !== undefined) break;
-    }
-  
-    // Check if any opponent piece can attack the king
-    for (let x = 1; x <= 8; x++) {
-      for (let y = 1; y <= 8; y++) {
-        let piece = checkPiece(x, y);
-        if (piece[0] === opponentColor) {
-          let moves = checkPossibleMoves(x, y);
-          if (moves !== 'empty') {
-            for (let move of moves) {
-              let [toX, toY] = move;
-              if (toX - 1 === kingX && 8 - toY === kingY) {
-                return true; // King is in check
-              }
-            }
-          }
-        }
-      }
-    }
-  
-    return false; // King is not in check
-  }
-  
-  // Simulate all possible moves to see if they stop checkmate
-  for (let x = 1; x <= 8; x++) {
-    for (let y = 1; y <= 8; y++) {
-      let piece = checkPiece(x, y);
-      if (piece[0] === colorInCheck) {
-        let moves = checkPossibleMoves(x, y);
-        if (moves !== 'empty') {
-          for (let move of moves) {
-            let [toX, toY] = move;
-            console.log(toX)
-            console.log(toY)
-            
-            // Simulate the move
-            let simulatedBoard = [];
-            for (let simX = 0; simX <= 7; simX++) {
-              simulatedBoard[simX] = [];
-              for (let simY = 0; simY <= 7; simY++) {
-                simulatedBoard[simX][simY] = getSprite(simX, simY);
-              }
-            }
-            console.log(simulatedBoard)
-            
-            // Update simulated board
-            simulatedBoard[toX - 1][8 - toY] = simulatedBoard[x - 1][8 - y];
-            simulatedBoard[x - 1][8 - y] = darkOrLight(x - 1, 8 - y) === 'dark' ? 'M' : 'm';
-            
-            // Check if the simulated move prevents check
-            if (!simulateMove(simulatedBoard, colorInCheck)) {
-              return "Not checkmate";
-            }
-          }
-        }
-      }
-    }
-  }
-
-  return colorInCheck === 'White' ? 'White is in Checkmate' : 'Black is in Checkmate';
-}
-
 let selectedX = 5
 let selectedY = 4
-selectSquare(selectedX, selectedY)
-
-console.log(isCheckmate())
+selectSquare(board, selectedX, selectedY)
 
 onInput("w", () => {
   if (selectedY < 8) {
     selectedY++
-    unselectAllSquares()
-    selectSquare(selectedX, selectedY)
+    unselectAllSquares(board)
+    selectSquare(board, selectedX, selectedY)
   }
 })
 
 onInput("a", () => {
   if (selectedX > 1) {
     selectedX--
-    unselectAllSquares()
-    selectSquare(selectedX, selectedY)
+    unselectAllSquares(board)
+    selectSquare(board, selectedX, selectedY)
   }
 })
 
 onInput("s", () => {
   if (selectedY > 1) {
     selectedY--
-    unselectAllSquares()
-    selectSquare(selectedX, selectedY)
+    unselectAllSquares(board)
+    selectSquare(board, selectedX, selectedY)
   }
 })
 
 onInput("d", () => {
   if (selectedX < 8) {
     selectedX++
-    unselectAllSquares()
-    selectSquare(selectedX, selectedY)
+    unselectAllSquares(board)
+    selectSquare(board, selectedX, selectedY)
   }
 })
 
