@@ -732,9 +732,9 @@ const screens = [
 aAaAaAaA
 MmMmMmMm
 mMmMmMmM
-EmMmMmMm
+MmMmMmMm
 mMmMmMmM
-PmMpPpPp
+PpPpPpPp
 rNbKqBnR`
 ]
 
@@ -1237,6 +1237,39 @@ function isCheck(board) {
   } else {
     return 'No Check';
   }
+}
+
+function isCheckmate(board) {
+  let checkStatus = isCheck(board);
+  if (checkStatus === 'No Check') {
+    return 'No Checkmates';
+  }
+
+  let colorInCheck = checkStatus === 'White Is Checked' ? 'White' : 'Black';
+  
+  // Simulate all possible moves to see if they stop checkmate
+  for (let x = 1; x <= 8; x++) {
+    for (let y = 1; y <= 8; y++) {
+      let piece = checkPiece(board, x, y);
+      if (piece[0] === colorInCheck) {
+        let moves = checkPossibleMoves(board, x, y);
+        if (moves !== 'empty') {
+          for (let move of moves) {
+            let [toX, toY] = move;
+            
+            simulatedBoard = simulateBoard(board, x, y, toX, toY)
+            
+            // Check if the simulated move prevents check
+            if (isCheck(simulatedBoard) != checkStatus) {
+              return "Not checkmate";
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return colorInCheck === 'White' ? 'White is in Checkmate' : 'Black is in Checkmate';
 }
 
 let selectedX = 5
