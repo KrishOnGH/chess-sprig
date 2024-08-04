@@ -728,31 +728,30 @@ setLegend(
 
 let level = 0
 const screens = [
-  map`
-FcEhGeCf
+  map`FcEhGeCf
 aAaAaAaA
 MmMmMmMm
 mMmMmMmM
-MmMmMmMm
+EmMmMmMm
 mMmMmMmM
-PpPpPpPp
+PmMpPpPp
 rNbKqBnR`
 ]
 
-const rows = screens[0].split('\n').map(row => row.split(''));
-const board = Array.from({ length: 8 }, () => []);
-rows.forEach(row => {
-  row.forEach((char, index) => {
-    board[index].push(char);
-  });
-});
+const board = [[], [], [], [], [], [], [], []]
+const rows = screens[0].split('\n');
+for (let y = 0; y <= 7; y++) {
+  for (let x = 0; x <= 7; x++) {
+    board[y].push(rows[y][x])
+  }
+}
 
 setMap(screens[level])
 
 // Screen control functions
 function getSprite(board, x, y) {
   if (x >= 0 && x <= 7 && y >= 0 && y <= 7) {
-    return board[x][y]
+    return board[y][x]
   } else {
     return '.'
   }
@@ -761,7 +760,7 @@ function getSprite(board, x, y) {
 function setSprite(board, x, y, newSprite) {
     clearTile(x, y)
     addSprite(x, y, newSprite)
-    board[x][y] = newSprite
+    board[y][x] = newSprite
 }
 
 function darkOrLight(x, y) {
@@ -1161,6 +1160,28 @@ function checkPossibleMoves(board, x, y) {
   }
 
   return possibleMoves
+}
+
+function simulateBoard(board, x, y, toX, toY) {
+  x = x - 1
+  y = 8 - y
+  toX = toX - 1
+  toY = 8 - toY
+  let simulatedBoard = board.map(row => row.slice());
+
+  if (darkOrLight(toX, toY) == 'dark') {
+    simulatedBoard[toY][toX] = simulatedBoard[y][x].toUpperCase()
+  } else {
+    simulatedBoard[toY][toX] = simulatedBoard[y][x].toLowerCase()
+  }
+
+  if (darkOrLight(x, y) == 'dark') {
+    simulatedBoard[y][x] = 'M'
+  } else {
+    simulatedBoard[y][x] = 'm'
+  }
+
+  return simulatedBoard
 }
 
 // Game state validator functions
