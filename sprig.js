@@ -1362,6 +1362,58 @@ function isDrawByInsufficientMaterial(board) {
   return false
 }
 
+// Main game cycle functions
+function checkState(board) {
+  if (isCheckmate(board) == 'Black is in Checkmate') {
+    return 'White wins'
+  } else if (isCheckmate(board) == 'White is in Checkmate') {
+    return 'Black wins'
+  } else if (isStalemate(board)) {
+    return 'Stalemate'
+  } else if (isDrawByInsufficientMaterial(board)) {
+    return 'Draw by Insufficient Material'
+  } else {
+    return 'Ongoing'
+  }
+}
+
+function move(board, x, y, toX, toY) {
+  let piece = checkPiece(board, x, y)
+  let simulatedBoard = simulateBoard(board, x, y, toX, toY)
+
+  if (piece[0] != 'White' && piece[0] != 'Black') {
+    return null;
+  }
+  
+  // Check if it is a legal move
+  if (!checkPossibleMoves(board, x, y).some(move => move[0] === toX && move[1] === toY)) {
+    return null;
+  }
+  
+  // Check for move leading to check
+  if ((isCheck(simulatedBoard) == 'White Is Checked' && piece[0] == 'White') || (isCheck(simulatedBoard) == 'Black Is Checked' && piece[0] == 'Black')) {
+    return null;
+  }
+
+  // Make move
+  x = x - 1
+  y = 8 - y
+  toX = toX - 1
+  toY = 8 - toY
+
+  if (darkOrLight(toX, toY) == 'dark') {
+    setSprite(board, toX, toY, board[y][x].toUpperCase())
+  } else {
+    setSprite(board, toX, toY, board[y][x].toLowerCase())
+  }
+
+  if (darkOrLight(x, y) == 'dark') {
+    setSprite(board, x, y, 'M')
+  } else {
+    setSprite(board, x, y, 'm')
+  }
+}
+
 let selectedX = 5
 let selectedY = 4
 selectSquare(board, selectedX, selectedY)
