@@ -729,17 +729,17 @@ setLegend(
 let level = 0
 const screens = [
   map`
-FcEhGeCf
-aAaAaAaA
-MmMmMmMm
+fCeHgEcF
+AaAaAaAa
 mMmMmMmM
 MmMmMmMm
 mMmMmMmM
-PpPpPpPp
-rNbKqBnR`
+MmMmMmMm
+pPpPpPpP
+RnBkQbNr`
 ]
 
-const board = [[], [], [], [], [], [], [], []]
+let board = [[], [], [], [], [], [], [], []]
 const content = screens[0].startsWith('\n') ? screens[0].substring(1) : screens[0];
 const rows = content.split('\n')
 for (let y = 0; y <= 7; y++) {
@@ -767,9 +767,9 @@ function setSprite(board, x, y, newSprite) {
 
 function darkOrLight(x, y) {
   if ((x+y) % 2 == 0) {
-    return 'dark'
-  } else {
     return 'light'
+  } else {
+    return 'dark'
   }
 }
 
@@ -866,60 +866,32 @@ function checkPossibleMoves(board, x, y) {
   let possibleMoves = []
 
   if (pieceName == 'Pawn') {
-    if (pieceColor == 'White') {
-      // Check Forward Piece
-      let forwardPiece = checkPiece(board, x, y+1)
-      if (forwardPiece == 'empty') {
-        possibleMoves.push([x, y+1])
-      }
-  
-      // Check Two Forward Piece if at Start
-      if (y == 2) {
-        let twoForwardPiece = checkPiece(board, x, y+2)
-        if (twoForwardPiece == 'empty') {
-          possibleMoves.push([x, y+2])
-        }
-      }
-  
-      // Check diagonal captures
-      let rightDiagonalPiece = checkPiece(board, x-1, y+1)
-      if (rightDiagonalPiece != 'empty' && rightDiagonalPiece != 'out of board' && rightDiagonalPiece[0] != pieceColor) {
-        possibleMoves.push([x-1, y+1])
-      }
-  
-      // Check diagonal captures
-      let leftDiagonalPiece = checkPiece(board, x+1, y+1)
-      if (leftDiagonalPiece != 'empty' && leftDiagonalPiece != 'out of board' && leftDiagonalPiece[0] != pieceColor) {
-        possibleMoves.push([x+1, y+1])
-      }
-    } else if (pieceColor == 'Black') {
-      // Check Forward Piece
-      let forwardPiece = checkPiece(board, x, y-1)
-      if (forwardPiece == 'empty') {
-        possibleMoves.push([x, y-1])
-      }
-  
-      // Check Two Forward Piece if at Start
-      if (y == 7) {
-        let twoForwardPiece = checkPiece(board, x, y-2)
-        if (twoForwardPiece == 'empty') {
-          possibleMoves.push([x, y-2])
-        }
-      }
-  
-      // Check diagonal captures
-      let rightDiagonalPiece = checkPiece(board, x-1, y-1)
-      if (rightDiagonalPiece != 'empty' && rightDiagonalPiece != 'out of board' && rightDiagonalPiece[0] != pieceColor) {
-        possibleMoves.push([x-1, y-1])
-      }
-  
-      // Check diagonal captures
-      let leftDiagonalPiece = checkPiece(board, x+1, y-1)
-      if (leftDiagonalPiece != 'empty' && leftDiagonalPiece != 'out of board' && leftDiagonalPiece[0] != pieceColor) {
-        possibleMoves.push([x+1, y-1])
+    // Check Forward Piece
+    let forwardPiece = checkPiece(board, x, y+1)
+    if (forwardPiece == 'empty') {
+      possibleMoves.push([x, y+1])
+    }
+
+    // Check Two Forward Piece if at Start
+    if (y == 2) {
+      let twoForwardPiece = checkPiece(board, x, y+2)
+      if (twoForwardPiece == 'empty') {
+        possibleMoves.push([x, y+2])
       }
     }
-  } 
+
+    // Check diagonal captures
+    let rightDiagonalPiece = checkPiece(board, x-1, y+1)
+    if (rightDiagonalPiece != 'empty' && rightDiagonalPiece != 'out of board' && rightDiagonalPiece[0] != pieceColor) {
+      possibleMoves.push([x-1, y+1])
+    }
+
+    // Check diagonal captures
+    let leftDiagonalPiece = checkPiece(board, x+1, y+1)
+    if (leftDiagonalPiece != 'empty' && leftDiagonalPiece != 'out of board' && leftDiagonalPiece[0] != pieceColor) {
+      possibleMoves.push([x+1, y+1])
+    }
+  }
   
   if (pieceName == 'Knight') {
     // Check Top Middle Right
@@ -969,7 +941,7 @@ function checkPossibleMoves(board, x, y) {
     if (bottomLeft != 'out of board' && (bottomLeft == 'empty' || bottomLeft[0] != pieceColor)) {
       possibleMoves.push([x-2, y-1])
     }
-  } 
+  }
   
   if (pieceName == 'Bishop' || pieceName == 'Queen') {
     // Top Right Diagonal
@@ -1416,11 +1388,28 @@ function move(board, x, y, toX, toY) {
   return 'Successful'
 }
 
+function flipBoard(board) {
+  let flippedBoard = [[], [], [], [], [], [], [], []]
+
+  for (let y = 0; y <= 7; y++) {
+    for (let x = 0; x <= 7; x++) {
+      flippedBoard[y].push(board[7-y][7-x])
+    }
+  }
+
+  for (let y = 0; y <= 7; y++) {
+    for (let x = 0; x <= 7; x++) {
+      setSprite(board, x, y, flippedBoard[y][x])
+    }
+  }
+}
+
 let selectedX = 5
 let selectedY = 4
 let placingX = 5
 let placingY = 4
 let isPlacing = false
+let turn = 'White'
 selectSquare(board, selectedX, selectedY)
 
 onInput("w", () => {
@@ -1476,25 +1465,30 @@ onInput("d", () => {
 })
 
 onInput("i", () => {
-  isPlacing = !isPlacing
   if (isPlacing) {
-    selectSquare(board, placingX, placingY)
-  } else {
+    isPlacing = !isPlacing
     unselectSquare(board, placingX, placingY)
+  } else if (checkPiece(board, selectedX, selectedY)[0] == turn) {
+    isPlacing = !isPlacing
+    selectSquare(board, placingX, placingY)
   }
 })
 
 onInput("l", () => {
-  if (isPlacing && (checkPiece(board, selectedX, selectedY)[0] == 'White' || checkPiece(board, selectedX, selectedY)[0] == 'Black') && checkPiece(board, selectedX, selectedY)[0] != checkPiece(board, placingX, placingY)[0]) {
+  if (isPlacing && checkPiece(board, selectedX, selectedY)[0] == turn && checkPiece(board, selectedX, selectedY)[0] != checkPiece(board, placingX, placingY)[0]) {
     let moveStatus = move(board, selectedX, selectedY, placingX, placingY)
     if (moveStatus == 'Successful') {
+      flipBoard(board)
       unselectAllSquares(board)
       selectedX = 5
       selectedY = 4
       selectSquare(board, selectedX, selectedY)
       isPlacing = false
+      if (turn == 'White') {
+        turn = 'Black'
+      } else {
+        turn = 'White'
+      }
     }
   }
 })
-
-afterInput(() => {})
