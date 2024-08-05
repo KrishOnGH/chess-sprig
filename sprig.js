@@ -1417,10 +1417,22 @@ function move(board, x, y, toX, toY) {
   toX = toX - 1
   toY = 8 - toY
 
+  lastMoves.push(JSON.parse(JSON.stringify(board)))
+  
   if (darkOrLight(toX, toY) == 'dark') {
-    setSprite(board, toX, toY, board[y][x].toUpperCase())
+    if (!(checkPiece(board, x+1, 8-y)[1] == 'Pawn' && 8-y == 7)) {
+      setSprite(board, toX, toY, board[y][x].toUpperCase())
+    } else {
+      let queen = checkPiece(board, x, y)[0] == 'White' ? 'q' : 'g'
+      setSprite(board, toX, toY, queen.toUpperCase())
+    }
   } else {
-    setSprite(board, toX, toY, board[y][x].toLowerCase())
+    if (!(checkPiece(board, x+1, 8-y)[1] == 'Pawn' && 8-y == 7)) {
+      setSprite(board, toX, toY, board[y][x].toLowerCase())
+    } else {
+      let queen = checkPiece(board, x+1, 8-y)[0] == 'White' ? 'q' : 'g'
+      setSprite(board, toX, toY, queen.toLowerCase())
+    }
   }
 
   if (darkOrLight(x, y) == 'dark') {
@@ -1428,7 +1440,7 @@ function move(board, x, y, toX, toY) {
   } else {
     setSprite(board, x, y, 'm')
   }
-
+  
   return 'Successful'
 }
 
@@ -1468,6 +1480,7 @@ function startGame() {
   isPlacing = false
   turn = 'White'
   isPlaying = true
+  lastMoves = []
   selectSquare(board, selectedX, selectedY)
 }
 
@@ -1480,6 +1493,14 @@ function endGame(state, reason) {
   isPlaying = false
 }
 
+function undo(lastMove) {
+  for (let y = 0; y <= 7; y++) {
+    for (let x = 0; x <= 7; x++) {
+      setSprite(board, x, y, lastMove[y][x])
+    }
+  }
+}
+
 let selectedX = 5
 let selectedY = 4
 let placingX = 5
@@ -1487,6 +1508,7 @@ let placingY = 4
 let isPlacing = false
 let turn = 'White'
 let isPlaying = true
+let lastMoves = []
 playTune(startSound)
 startGame()
 selectSquare(board, selectedX, selectedY)
@@ -1604,6 +1626,22 @@ onInput("j", () => {
       endGame('Black Wins', 'Resignation')
     } else {
       endGame('White Wins', 'Resignation')
+    }
+  }
+})
+
+onInput("k", () => {
+  if (lastMoves.length > 0 && isPlaying) {
+    undo(lastMoves[lastMoves.length-1])
+    unselectAllSquares(board)
+    selectedX = 5
+    selectedY = 4
+    selectSquare(board, selectedX, selectedY)
+    isPlacing = false
+    if (turn == 'White') {
+      turn = 'Black'
+    } else {
+      turn = 'White'
     }
   }
 })
