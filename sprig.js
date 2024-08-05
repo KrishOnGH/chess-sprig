@@ -1,9 +1,6 @@
 /*
-First time? Check out the tutorial game:
-https://sprig.hackclub.com/gallery/getting_started
-
 @title: Chess
-@author: 
+@author: Krish Arora
 @tags: []
 @addedOn: 2024-00-00
 */
@@ -756,6 +753,47 @@ RnBkQbNr`,
 ]
 let board
 
+const placeSound = tune`
+147.05882352941177,
+147.05882352941177: F5~147.05882352941177 + E5-147.05882352941177,
+147.05882352941177: E5~147.05882352941177 + D5-147.05882352941177,
+4264.705882352941`
+
+const selectSound = tune`
+500: C5~500 + B4-500,
+15500`
+
+const cannotSelectSound = tune`
+152.28426395939087: E4~152.28426395939087 + D4-152.28426395939087,
+152.28426395939087: F4~152.28426395939087 + E4-152.28426395939087,
+4568.527918781726`
+
+const wasdSound = tune`
+500: D5/500,
+15500`
+
+const endSound = tune`
+97.71986970684038: B4-97.71986970684038 + C5-97.71986970684038,
+97.71986970684038,
+97.71986970684038: E5-97.71986970684038 + C5-97.71986970684038,
+97.71986970684038: B4-97.71986970684038,
+97.71986970684038: B4-97.71986970684038 + C5-97.71986970684038,
+2638.4364820846904`
+
+const startSound = tune`
+73.17073170731707: E5/73.17073170731707 + F5/73.17073170731707,
+73.17073170731707: D5/73.17073170731707 + C5/73.17073170731707,
+73.17073170731707: B4/73.17073170731707 + A4/73.17073170731707,
+73.17073170731707: A4/73.17073170731707 + G4/73.17073170731707,
+73.17073170731707: G4/73.17073170731707 + F4/73.17073170731707,
+73.17073170731707: F4/73.17073170731707 + E4/73.17073170731707,
+73.17073170731707: G4/73.17073170731707 + A4/73.17073170731707,
+73.17073170731707: B4/73.17073170731707 + C5/73.17073170731707,
+73.17073170731707: D5/73.17073170731707 + E5/73.17073170731707,
+73.17073170731707: F5/73.17073170731707 + G5/73.17073170731707,
+73.17073170731707: A5/73.17073170731707 + B5/73.17073170731707,
+1536.5853658536585`
+
 // Screen control functions
 function getSprite(board, x, y) {
   if (x >= 0 && x <= 7 && y >= 0 && y <= 7) {
@@ -1449,6 +1487,7 @@ let placingY = 4
 let isPlacing = false
 let turn = 'White'
 let isPlaying = true
+playTune(startSound)
 startGame()
 selectSquare(board, selectedX, selectedY)
 
@@ -1457,9 +1496,11 @@ onInput("w", () => {
     unselectAllSquares(board)
     placingY++
     selectSquare(board, placingX, placingY)
+    playTune(wasdSound)
   } else if (isPlaying && !isPlacing && selectedY < 8) {
     unselectAllSquares(board)
     selectedY++
+    playTune(wasdSound)
   }
   
   selectSquare(board, selectedX, selectedY)
@@ -1470,9 +1511,11 @@ onInput("a", () => {
     unselectAllSquares(board)
     placingX--
     selectSquare(board, placingX, placingY)
+    playTune(wasdSound)
   } else if (isPlaying && !isPlacing && selectedX > 1) {
     unselectAllSquares(board)
     selectedX--
+    playTune(wasdSound)
   }
   
   selectSquare(board, selectedX, selectedY)
@@ -1483,9 +1526,11 @@ onInput("s", () => {
     unselectAllSquares(board)
     placingY--
     selectSquare(board, placingX, placingY)
+    playTune(wasdSound)
   } else if (isPlaying && !isPlacing && selectedY > 1) {
     unselectAllSquares(board)
     selectedY--
+    playTune(wasdSound)
   }
   
   selectSquare(board, selectedX, selectedY)
@@ -1495,10 +1540,12 @@ onInput("d", () => {
   if (isPlaying && isPlacing && placingX < 8) {
     unselectAllSquares(board)
     placingX++
+    playTune(wasdSound)
     selectSquare(board, placingX, placingY)
   } else if (isPlaying && !isPlacing && selectedX < 8) {
     unselectAllSquares(board)
     selectedX++
+    playTune(wasdSound)
   }
   
   selectSquare(board, selectedX, selectedY)
@@ -1508,9 +1555,13 @@ onInput("i", () => {
   if (isPlaying && isPlacing) {
     isPlacing = !isPlacing
     unselectSquare(board, placingX, placingY)
+    playTune(selectSound)
   } else if (isPlaying && checkPiece(board, selectedX, selectedY)[0] == turn) {
     isPlacing = !isPlacing
     selectSquare(board, placingX, placingY)
+    playTune(selectSound)
+  } else {
+    playTune(cannotSelectSound)
   }
 })
 
@@ -1529,9 +1580,12 @@ onInput("l", () => {
       } else {
         turn = 'White'
       }
+      
+      playTune(placeSound)
 
       let gameState = checkState(board)
       if (gameState != 'Ongoing') {
+        playTune(endSound)
         endGame(gameState[0], gameState[1])
       }
     }
@@ -1541,9 +1595,11 @@ onInput("l", () => {
 onInput("j", () => {
   if (!isPlaying) {
     isPlaying = true
+    playTune(startSound)
     startGame()
   } else {
     isPlaying = false
+    playTune(endSound)
     if (turn == 'White') {
       endGame('Black Wins', 'Resignation')
     } else {
