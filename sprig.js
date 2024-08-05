@@ -726,7 +726,6 @@ setLegend(
 7777777777777777` ]
 )
 
-let level = 0
 const screens = [
   map`
 fCeHgEcF
@@ -736,19 +735,26 @@ MmMmMmMm
 mMmMmMmM
 MmMmMmMm
 pPpPpPpP
-RnBkQbNr`
+RnBkQbNr`, 
+  map`
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................`
 ]
-
-let board = [[], [], [], [], [], [], [], []]
-const content = screens[0].startsWith('\n') ? screens[0].substring(1) : screens[0];
-const rows = content.split('\n')
-for (let y = 0; y <= 7; y++) {
-  for (let x = 0; x <= 7; x++) {
-    board[y].push(rows[y][x])
-  }
-}
-
-setMap(screens[level])
+let board
 
 // Screen control functions
 function getSprite(board, x, y) {
@@ -1337,13 +1343,13 @@ function isDrawByInsufficientMaterial(board) {
 // Main game cycle functions
 function checkState(board) {
   if (isCheckmate(board) == 'Black is in Checkmate') {
-    return 'White wins'
+    return ['White wins', 'Checkmate']
   } else if (isCheckmate(board) == 'White is in Checkmate') {
-    return 'Black wins'
+    return ['Black wins', 'Checkmate']
   } else if (isStalemate(board)) {
-    return 'Stalemate'
+    return ['Draw', 'Stalemate']
   } else if (isDrawByInsufficientMaterial(board)) {
-    return 'Draw by Insufficient Material'
+    return ['Draw', 'Insuff. Material']
   } else {
     return 'Ongoing'
   }
@@ -1404,20 +1410,54 @@ function flipBoard(board) {
   }
 }
 
+function startGame() {
+  setMap(screens[0])
+  clearText()
+
+  board = [[], [], [], [], [], [], [], []]
+  const content = screens[0].startsWith('\n') ? screens[0].substring(1) : screens[0];
+  const rows = content.split('\n')
+  for (let y = 0; y <= 7; y++) {
+    for (let x = 0; x <= 7; x++) {
+      board[y].push(rows[y][x])
+    }
+  }
+
+  selectedX = 5
+  selectedY = 4
+  placingX = 5
+  placingY = 4
+  isPlacing = false
+  turn = 'White'
+  isPlaying = true
+  selectSquare(board, selectedX, selectedY)
+}
+
+function endGame(state, reason) {
+  setMap(screens[1])
+  let x = 20 - state.length
+  addText(state, {x: x/2, y: 6, color: color`0`})
+  x = 20 - reason.length
+  addText(reason, {x: Math.ceil(x/2), y: 8, color: color`0`})
+  isPlaying = false
+}
+
 let selectedX = 5
 let selectedY = 4
 let placingX = 5
 let placingY = 4
 let isPlacing = false
 let turn = 'White'
+let isPlaying = true
+startGame()
 selectSquare(board, selectedX, selectedY)
 
 onInput("w", () => {
-  if (isPlacing && placingY < 8) {
+  if (isPlaying && isPlacing && placingY < 8) {
     unselectAllSquares(board)
     placingY++
     selectSquare(board, placingX, placingY)
-  } else if (!isPlacing && selectedY < 8) {
+  } else if (isPlaying && !isPlacing && selectedY < 8) {
     unselectAllSquares(board)
     selectedY++
   }
@@ -1426,11 +1466,11 @@ onInput("w", () => {
 })
 
 onInput("a", () => {
-  if (isPlacing && placingX > 1) {
+  if (isPlaying && isPlacing && placingX > 1) {
     unselectAllSquares(board)
     placingX--
     selectSquare(board, placingX, placingY)
-  } else if (!isPlacing && selectedX > 1) {
+  } else if (isPlaying && !isPlacing && selectedX > 1) {
     unselectAllSquares(board)
     selectedX--
   }
@@ -1439,11 +1479,11 @@ onInput("a", () => {
 })
 
 onInput("s", () => {
-  if (isPlacing && placingY > 1) {
+  if (isPlaying && isPlacing && placingY > 1) {
     unselectAllSquares(board)
     placingY--
     selectSquare(board, placingX, placingY)
-  } else if (!isPlacing && selectedY > 1) {
+  } else if (isPlaying && !isPlacing && selectedY > 1) {
     unselectAllSquares(board)
     selectedY--
   }
@@ -1452,11 +1492,11 @@ onInput("s", () => {
 })
 
 onInput("d", () => { 
-  if (isPlacing && placingX < 8) {
+  if (isPlaying && isPlacing && placingX < 8) {
     unselectAllSquares(board)
     placingX++
     selectSquare(board, placingX, placingY)
-  } else if (!isPlacing && selectedX < 8) {
+  } else if (isPlaying && !isPlacing && selectedX < 8) {
     unselectAllSquares(board)
     selectedX++
   }
@@ -1465,17 +1505,17 @@ onInput("d", () => {
 })
 
 onInput("i", () => {
-  if (isPlacing) {
+  if (isPlaying && isPlacing) {
     isPlacing = !isPlacing
     unselectSquare(board, placingX, placingY)
-  } else if (checkPiece(board, selectedX, selectedY)[0] == turn) {
+  } else if (isPlaying && checkPiece(board, selectedX, selectedY)[0] == turn) {
     isPlacing = !isPlacing
     selectSquare(board, placingX, placingY)
   }
 })
 
 onInput("l", () => {
-  if (isPlacing && checkPiece(board, selectedX, selectedY)[0] == turn && checkPiece(board, selectedX, selectedY)[0] != checkPiece(board, placingX, placingY)[0]) {
+  if (isPlaying && isPlacing && checkPiece(board, selectedX, selectedY)[0] == turn && checkPiece(board, selectedX, selectedY)[0] != checkPiece(board, placingX, placingY)[0]) {
     let moveStatus = move(board, selectedX, selectedY, placingX, placingY)
     if (moveStatus == 'Successful') {
       flipBoard(board)
@@ -1489,6 +1529,25 @@ onInput("l", () => {
       } else {
         turn = 'White'
       }
+
+      let gameState = checkState(board)
+      if (gameState != 'Ongoing') {
+        endGame(gameState[0], gameState[1])
+      }
+    }
+  }
+})
+
+onInput("j", () => {
+  if (!isPlaying) {
+    isPlaying = true
+    startGame()
+  } else {
+    isPlaying = false
+    if (turn == 'White') {
+      endGame('Black Wins', 'Resignation')
+    } else {
+      endGame('White Wins', 'Resignation')
     }
   }
 })
