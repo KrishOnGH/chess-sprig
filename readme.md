@@ -22,10 +22,10 @@ Welcome to the best Sprig Chess game! This is an excellent classic 8x8 chess gam
 
 ## Controls
 
-To select a piece, you can use the WASD buttons.
-If you wish to pick up a piece, simply press I.
-To place your selected piece, press L.
-If you made a mistake, you can undo the last move(s) by pressing K.
+- To select a piece, you can use the WASD buttons.
+- If you wish to pick up a piece, simply press I.
+- To place your selected piece, press L.
+- If you made a mistake, you can undo the last move(s) by pressing K.
 
 ## Game Rules
 
