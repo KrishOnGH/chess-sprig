@@ -1,3 +1,5 @@
+![Link to Play](https://github.com/KrishOnGH/chess-sprig/blob/621d7d8e1e10a2a66955e7b251a76bd82c725c38/cover.png)
+
 # Sprig Chess Game
 
 Welcome to the best Sprig Chess game! This is an excellent classic 8x8 chess game designed for the Sprig Console by Hackclub. It's designed for two players and offers a unique multiplayer experience where the board flips to the current player's perspective.
