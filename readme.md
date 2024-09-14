@@ -1,4 +1,4 @@
-![Link to Play](https://github.com/KrishOnGH/chess-sprig/blob/621d7d8e1e10a2a66955e7b251a76bd82c725c38/cover.png)
+![Cover Image](https://github.com/KrishOnGH/chess-sprig/blob/621d7d8e1e10a2a66955e7b251a76bd82c725c38/cover.png)
 
 # Sprig Chess Game
 
